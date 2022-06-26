@@ -3,7 +3,7 @@ import Masonry from 'react-masonry-css';
 import Pin from './Pin';
 
 const breakpointColumnsObj = {
-  default: 4,
+  default: 3,
   3000: 6,
   2000: 5,
   1200: 3,

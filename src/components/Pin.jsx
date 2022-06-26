@@ -10,30 +10,16 @@ import { fetchUser } from '../utils/fetchUser';
 
 const Pin = ({ pin: { postedBy, image, _id, destination, save } }) => {
   const [postHovered, setPostHovered] = useState(false);
-  const [savingPost, setSavingPost] = useState(false);
-
   const navigate = useNavigate();
-
-//   const { postedBy, image, _id, destination } = pin;
-
   const user = fetchUser();
 
-  const deletePin = (id) => {
-    client
-      .delete(id)
-      .then(() => {
-        window.location.reload();
-      });
-  };
+  
+  const alreadySaved = !!(save?.filter((item) => item?.postedBy?._id === user?.googleId))?.length;
 
-  const alreadySaved = !!(save?.filter((item) => item?.postedBy?._id === user?.googleId));
-
-  alreadySaved = alreadySaved?.length > 0 ? alreadySaved : [];
+  // alreadySaved = alreadySaved?.length > 0 ? alreadySaved : [];
 
   const savePin = (id) => {
-    if (alreadySaved?.length === 0) {
-      setSavingPost(true);
-
+    if (!alreadySaved) {
       client
         .patch(id)
         .setIfMissing({ save: [] })
@@ -48,9 +34,15 @@ const Pin = ({ pin: { postedBy, image, _id, destination, save } }) => {
         .commit()
         .then(() => {
           window.location.reload();
-          setSavingPost(false);
         });
     }
+  };
+  const deletePin = (id) => {
+    client
+      .delete(id)
+      .then(() => {
+        window.location.reload();
+      });
   };
 
   return (
@@ -73,16 +65,14 @@ const Pin = ({ pin: { postedBy, image, _id, destination, save } }) => {
                 <a
                   href={`${image?.asset?.url}?dl=`}
                   download
-                  onClick={(e) => {
-                    e.stopPropagation();
-                  }}
+                  onClick={(e) => { e.stopPropagation(); }}
                   className="bg-white w-9 h-9 p-2 rounded-full flex items-center justify-center text-dark text-xl opacity-75 hover:opacity-100 hover:shadow-md outline-none"
                 ><MdDownloadForOffline />
                 </a>
               </div>
-              {alreadySaved?.length !== 0 ? (
+              {alreadySaved ? (
                 <button type="button" className="bg-red-500 opacity-70 hover:opacity-100 text-white font-bold px-5 py-1 text-base rounded-3xl hover:shadow-md outline-none">
-                  {pin?.save?.length}  Saved
+                  {save?.length}  Saved
                 </button>
               ) : (
                 <button
@@ -93,7 +83,7 @@ const Pin = ({ pin: { postedBy, image, _id, destination, save } }) => {
                   type="button"
                   className="bg-red-500 opacity-70 hover:opacity-100 text-white font-bold px-5 py-1 text-base rounded-3xl hover:shadow-md outline-none"
                 >
-                  {pin?.save?.length}   {savingPost ? 'Saving' : 'Save'}
+                  Save
                 </button>
               )}
             </div>
@@ -107,7 +97,7 @@ const Pin = ({ pin: { postedBy, image, _id, destination, save } }) => {
                 >
                   {' '}
                   <BsFillArrowUpRightCircleFill />
-                  {destination?.slice(8, 17)}...
+                  {destination.length > 15 ? `${destination.slice(0, 15)}...` : destination}
                 </a>
               ) : undefined}
               {
